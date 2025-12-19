@@ -261,3 +261,27 @@ function showNotification(msg, type) {
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
 window.clearImagePreview = clearImagePreview;
+// =====================
+// MOBILE SIDEBAR FIX (ADDED)
+// =====================
+
+// Toggle sidebar on small screens
+document.addEventListener('DOMContentLoaded', () => {
+  const menuToggle = document.getElementById('menu-toggle');
+  const sidebar = document.querySelector('.sidebar');
+
+  if (menuToggle && sidebar) {
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+    });
+  }
+
+  // Auto-close sidebar when section clicked (mobile only)
+  document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+    item.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        sidebar?.classList.remove('open');
+      }
+    });
+  });
+});
