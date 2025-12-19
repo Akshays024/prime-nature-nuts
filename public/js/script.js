@@ -184,12 +184,26 @@ function setupSmoothScrolling() {
 // =====================
 // REALTIME UPDATES
 // =====================
+let productsChannel = null;
+
 function setupRealtimeUpdates() {
-  sb.channel('products-changes')
+  if (productsChannel) return; // prevent duplicate subscriptions
+
+  productsChannel = sb
+    .channel('public-products-realtime')
     .on(
       'postgres_changes',
-      { event: '*', schema: 'public', table: 'products' },
-      () => loadProducts()
+      {
+        event: '*',          // INSERT, UPDATE, DELETE
+        schema: 'public',
+        table: 'products'
+      },
+      payload => {
+        console.log('Realtime update:', payload);
+        loadProducts(); // instant refresh
+      }
     )
-    .subscribe();
+    .subscribe(status => {
+      console.log('Realtime status:', status);
+    });
 }
