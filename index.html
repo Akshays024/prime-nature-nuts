@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prime Nature – Premium Quality Nuts & Dry Fruits</title>
+
+  <!-- Main Styles -->
+  <link rel="stylesheet" href="public/css/style.css" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="logo">
+      <span class="logo-icon">🌰</span>
+      <span class="logo-text">Prime Nature</span>
+    </a>
+
+    <div class="nav-links">
+      <a href="index.html" class="active">Home</a>
+      <a href="about.html">About</a>
+      <a href="products.html">Products</a>
+      <a href="contact.html">Contact</a>
+      <a href="admin.html" class="admin-link" target="_blank">Admin</a>
+    </div>
+
+    <div class="mobile-menu-btn">
+      <i class="fas fa-bars"></i>
+    </div>
+  </div>
+</nav>
+
+<!-- ================= MOBILE MENU ================= -->
+<div class="mobile-menu">
+  <div class="mobile-menu-content">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="products.html">Products</a>
+    <a href="contact.html">Contact</a>
+    <a href="admin.html" target="_blank">Admin</a>
+    <div class="mobile-menu-close">
+      <i class="fas fa-times"></i>
+    </div>
+  </div>
+</div>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <h1 class="hero-title">Premium Quality Nuts & Dry Fruits</h1>
+      <p class="hero-subtitle">
+        Sourced from nature’s finest farms. Pure, fresh, and responsibly delivered.
+      </p>
+
+      <div class="hero-buttons">
+        <a href="tel:+919999999999" class="btn btn-primary">
+          <i class="fas fa-phone"></i> Call Now
+        </a>
+        <a
+          href="https://wa.me/919999999999?text=Hello%20Prime%20Nature,%20I%20want%20to%20order%20dry%20fruits"
+          class="btn btn-whatsapp"
+          target="_blank"
+        >
+          <i class="fab fa-whatsapp"></i> Order on WhatsApp
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-image">
+      <div class="hero-image-placeholder">
+        <div class="hero-image-content">
+          <div class="nut-image almond"></div>
+          <div class="nut-image walnut"></div>
+          <div class="nut-image pistachio"></div>
+          <div class="nut-image cashew"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ABOUT PREVIEW ================= -->
+<section class="about">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">About Prime Nature</h2>
+      <p class="section-subtitle">Pure. Natural. Premium.</p>
+    </div>
+
+    <div class="about-content">
+      <div class="about-image">
+        <div class="about-image-placeholder"></div>
+      </div>
+
+      <div class="about-text">
+        <p>
+          Prime Nature delivers premium nuts and dry fruits sourced directly
+          from trusted farmers. No chemicals. No compromise.
+        </p>
+        <p>
+          Every batch is carefully selected, hygienically packed,
+          and quality-checked before delivery.
+        </p>
+
+        <div class="about-features">
+          <div class="feature"><i class="fas fa-leaf"></i><span>100% Natural</span></div>
+          <div class="feature"><i class="fas fa-check-circle"></i><span>Quality Checked</span></div>
+          <div class="feature"><i class="fas fa-seedling"></i><span>Sustainably Sourced</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRODUCTS PREVIEW ================= -->
+<section class="products">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Our Products</h2>
+      <p class="section-subtitle">Handpicked & naturally delicious</p>
+    </div>
+
+    <div class="products-container" id="products-container">
+      <div class="loading-products">
+        <div class="loading-spinner"></div>
+        <p>Loading products…</p>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:40px;">
+      <a href="products.html" class="btn btn-primary">View All Products</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <a href="index.html" class="logo">
+          <span class="logo-icon">🌰</span>
+          <span class="logo-text">Prime Nature</span>
+        </a>
+        <p class="footer-tagline">Premium Quality Nuts & Dry Fruits</p>
+      </div>
+
+      <div class="footer-links">
+        <h3>Quick Links</h3>
+        <a href="index.html">Home</a>
+        <a href="products.html">Products</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </div>
+
+      <div class="footer-contact">
+        <h3>Contact</h3>
+        <p><i class="fas fa-phone"></i> +91 99999 99999</p>
+        <p><i class="fas fa-envelope"></i> info@primenature.com</p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; <span id="current-year"></span> Prime Nature. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ================= SCRIPTS ================= -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="public/js/supabaseClient.js"></script>
+<script src="public/js/script.js"></script>
+
+<script>
+  document.getElementById("current-year").textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>

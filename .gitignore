@@ -1,0 +1,19 @@
+.DS_Store
+node_modules
+.env
+# Create .gitignore file
+touch .gitignore
+
+# Open it in your editor and add these contents:
+echo "node_modules/" >> .gitignore
+echo ".DS_Store" >> .gitignore
+echo "*.log" >> .gitignore
+echo "dist/" >> .gitignore
+echo ".env" >> .gitignore
+echo ".env.local" >> .gitignore
+echo ".env.development.local" >> .gitignore
+echo ".env.test.local" >> .gitignore
+echo ".env.production.local" >> .gitignore
+echo ".vscode/" >> .gitignore
+echo "*.swp" >> .gitignore
+echo "*.swo" >> .gitignore
