@@ -309,3 +309,44 @@ document.addEventListener('DOMContentLoaded', () => {
     navigateTo(hash);
   }
 });
+
+// =====================
+// SEASONAL ANIMATIONS
+// =====================
+function initSeasonalAnimations() {
+  const container = document.createElement('div');
+  container.className = 'seasonal-container';
+  document.body.appendChild(container);
+
+  const date = new Date();
+  const month = date.getMonth(); // 0 = Jan, 11 = Dec
+  
+  // Default: Nature Leaves (Matches your brand)
+  let icon = '🍃'; 
+
+  // December/January (Festive/Winter Season)
+  if (month === 11 || month === 0) {
+    icon = '❄️';
+  } 
+  // October/November (Autumn)
+  else if (month === 9 || month === 10) {
+    icon = '🍂';
+  }
+
+  // Create 15 falling particles
+  for (let i = 0; i < 15; i++) {
+    const el = document.createElement('div');
+    el.className = 'seasonal-element';
+    el.textContent = icon;
+    
+    // Randomize positioning and timing for natural look
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.animationDuration = (Math.random() * 8 + 8) + 's'; // 8-16s duration
+    el.style.animationDelay = (Math.random() * 5) + 's';
+    el.style.fontSize = (Math.random() * 10 + 15) + 'px'; // 15-25px size
+    
+    container.appendChild(el);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initSeasonalAnimations);
