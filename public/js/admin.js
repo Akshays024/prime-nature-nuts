@@ -112,7 +112,11 @@ async function handleAddProduct(e) {
   e.preventDefault();
 
   const preview = document.getElementById('image-preview');
-  if (!preview.dataset.imageData) return showNotification('Image required', 'error');
+  if (!preview.uploadFile) return showNotification('Image required', 'error');
+
+  // 1. Upload Image to Supabase Storage
+  const imageUrl = await uploadImageToBucket(preview.uploadFile);
+  if (!imageUrl) return; // Error handled in helper
 
   const product = {
     name: document.getElementById('product-name').value.trim(),
@@ -121,7 +125,7 @@ async function handleAddProduct(e) {
     price: document.getElementById('product-price').value || null,
     description: document.getElementById('product-description').value,
     status: document.getElementById('product-status').value,
-    image_url: preview.dataset.imageData
+    image_url: imageUrl
   };
 
   const { error } = await sb.from('products').insert([product]);
@@ -188,7 +192,11 @@ async function handleEditProduct(e) {
     status: document.getElementById('edit-product-status').value
   };
 
-  if (preview.dataset.imageData) update.image_url = preview.dataset.imageData;
+  // If a new image was selected, upload it
+  if (preview.uploadFile) {
+    const imageUrl = await uploadImageToBucket(preview.uploadFile);
+    if (imageUrl) update.image_url = imageUrl;
+  }
 
   await sb.from('products').update(update).eq('id', id);
 
@@ -201,6 +209,26 @@ async function deleteProduct(id) {
   if (!confirm('Delete product?')) return;
   await sb.from('products').delete().eq('id', id);
   loadAdminProducts();
+}
+
+// =====================
+// STORAGE UPLOAD HELPER
+// =====================
+async function uploadImageToBucket(file) {
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
+  const filePath = `products/${fileName}`;
+  
+  const { error } = await sb.storage
+    .from('product-images')
+    .upload(filePath, file);
+
+  if (error) {
+    showNotification('Image upload failed: ' + error.message, 'error');
+    return null;
+  }
+
+  const { data } = sb.storage.from('product-image').getPublicUrl(filePath);
+  return data.publicUrl;
 }
 
 // =====================
@@ -275,6 +303,7 @@ async function handleImageUpload(file, preview) {
   const reader = new FileReader();
   reader.onload = e => {
     preview.dataset.imageData = e.target.result;
+    preview.uploadFile = compressed; // Store file for upload
     preview.innerHTML = `<img src="${e.target.result}" style="max-width:100%">`;
   };
   reader.readAsDataURL(compressed);
@@ -284,6 +313,7 @@ function clearImagePreview() {
   const p = document.getElementById('image-preview');
   p.innerHTML = '';
   delete p.dataset.imageData;
+  delete p.uploadFile;
 }
 
 function closeEditModal() {
