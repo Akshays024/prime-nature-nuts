@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setupCategoryFilters();
   setupSearch();
+  setupThemeToggle();
 
   if (modalCloseBtn && productModal) {
     modalCloseBtn.onclick = () => (productModal.style.display = 'none');
@@ -59,6 +60,42 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 });
+
+// =====================
+// THEME TOGGLE
+// =====================
+function setupThemeToggle() {
+  const toggleBtn = document.getElementById('theme-toggle');
+  const mobileToggleBtn = document.getElementById('mobile-theme-toggle');
+  const icon = toggleBtn ? toggleBtn.querySelector('i') : null;
+  const mobileIcon = mobileToggleBtn ? mobileToggleBtn.querySelector('i') : null;
+
+  // Check saved preference
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    if (icon) icon.className = 'fas fa-sun';
+    if (mobileIcon) mobileIcon.className = 'fas fa-sun';
+  }
+
+  const toggleTheme = (e) => {
+    if (e) e.preventDefault();
+    
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+
+    // Update Icons
+    const newIconClass = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    if (icon) icon.className = newIconClass;
+    if (mobileIcon) mobileIcon.className = newIconClass;
+  };
+
+  if (toggleBtn) toggleBtn.addEventListener('click', toggleTheme);
+  if (mobileToggleBtn) mobileToggleBtn.addEventListener('click', toggleTheme);
+}
 
 // =====================
 // LOAD PRODUCTS
@@ -181,7 +218,7 @@ function displayProducts(products) {
           <div class="product-details">
             <h3>${p.name}</h3>
             <p>${p.description || ''}</p>
-            ${p.weight ? `<div class="product-weight" style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 5px;">${p.weight}</div>` : ''}
+            ${p.weight ? `<div class="product-weight">${p.weight}</div>` : ''}
             <div class="product-price">${price}</div>
 
             <div class="product-actions">
@@ -269,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // SPA Navigation Logic
-  const navLinks = document.querySelectorAll('a[href^="#"]');
+  const navLinks = document.querySelectorAll('a[href^="#"]:not(#mobile-theme-toggle)');
   const sections = document.querySelectorAll('section[id]');
 
   function navigateTo(targetId) {
