@@ -1,5 +1,3 @@
-// script.js – Public website (READ-ONLY)
-
 // =====================
 // STATE
 // =====================
@@ -31,12 +29,6 @@ let modalCloseBtn;
 // INIT
 // =====================
 document.addEventListener('DOMContentLoaded', () => {
-  // Safe year update
-  const yearEl = document.getElementById('current-year');
-  if (yearEl) {
-    yearEl.textContent = new Date().getFullYear();
-  }
-
   productsContainer = document.getElementById('products-container');
   productModal = document.getElementById('product-modal');
   modalCloseBtn = document.getElementById('modal-close');
@@ -47,53 +39,38 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   setupCategoryFilters();
-  setupMobileMenu();
-  setupSmoothScrolling();
 
   if (modalCloseBtn && productModal) {
-    modalCloseBtn.addEventListener('click', () => {
-      productModal.style.display = 'none';
-    });
-
-    productModal.addEventListener('click', e => {
-      if (e.target === productModal) {
-        productModal.style.display = 'none';
-      }
-    });
+    modalCloseBtn.onclick = () => (productModal.style.display = 'none');
+    productModal.onclick = e => {
+      if (e.target === productModal) productModal.style.display = 'none';
+    };
   }
 });
 
 // =====================
-// PRODUCTS
+// LOAD PRODUCTS
 // =====================
 async function loadProducts() {
-  try {
-    productsContainer.innerHTML = `
-      <div class="loading-products">
-        <div class="loading-spinner"></div>
-        <p>Loading our premium products...</p>
-      </div>
-    `;
+  productsContainer.innerHTML = `
+    <div class="loading-products">
+      <div class="loading-spinner"></div>
+      <p>Loading products...</p>
+    </div>
+  `;
 
-    const { data, error } = await sb
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
+  const { data, error } = await sb
+    .from('products')
+    .select('*')
+    .order('created_at', { ascending: false });
 
-    if (error) throw error;
-
-    allProducts = data;
-    applyCategoryFilter();
-
-  } catch (err) {
-    console.error(err);
-    productsContainer.innerHTML = `
-      <div class="error-loading">
-        <p>Unable to load products.</p>
-        <button onclick="loadProducts()" class="btn btn-primary">Retry</button>
-      </div>
-    `;
+  if (error) {
+    productsContainer.innerHTML = `<p>Error loading products</p>`;
+    return;
   }
+
+  allProducts = data;
+  applyCategoryFilter();
 }
 
 // =====================
@@ -101,7 +78,7 @@ async function loadProducts() {
 // =====================
 function setupCategoryFilters() {
   document.querySelectorAll('.category-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.onclick = () => {
       document
         .querySelectorAll('.category-btn')
         .forEach(b => b.classList.remove('active'));
@@ -109,83 +86,78 @@ function setupCategoryFilters() {
       btn.classList.add('active');
       activeCategory = btn.dataset.category;
       applyCategoryFilter();
-    });
+    };
   });
 }
 
 function applyCategoryFilter() {
-  if (activeCategory === 'all') {
-    displayProducts(allProducts);
-  } else {
-    const filtered = allProducts.filter(
-      p => p.category === activeCategory
-    );
-    displayProducts(filtered);
-  }
+  const list =
+    activeCategory === 'all'
+      ? allProducts
+      : allProducts.filter(p => p.category === activeCategory);
+
+  displayProducts(list);
 }
 
 // =====================
 // RENDER PRODUCTS
 // =====================
 function displayProducts(products) {
-  if (!products || products.length === 0) {
-    productsContainer.innerHTML = `<p>No products available.</p>`;
+  if (!products.length) {
+    productsContainer.innerHTML = `<p>No products found</p>`;
     return;
   }
 
-  productsContainer.innerHTML = products.map(p => {
-    const price = p.price ? formatINR(p.price) : 'Price on request';
-    const img =
-      p.image_url ||
-      'https://media.istockphoto.com/id/1127742967/photo/assorted-nuts-on-white-dry-fruits-mix-nuts-almond-cashew-raisins.jpg';
+  productsContainer.innerHTML = products
+    .map(p => {
+      const price = p.price ? formatINR(p.price) : 'Price on request';
+      const img =
+        p.image_url ||
+        'https://media.istockphoto.com/id/1127742967/photo/assorted-nuts-on-white-dry-fruits-mix-nuts-almond-cashew-raisins.jpg';
 
-   const imageLink = p.image_url
-  ? `\n\nProduct Image:\n${p.image_url}`
-  : '';
+      // SAFE WHATSAPP MESSAGE
+      const message = encodeURIComponent(
+        `Hello Prime Nature 👋\n\n` +
+          `Product: ${p.name}\n` +
+          `Category: ${p.category || 'N/A'}\n` +
+          `Price: ${p.price ? formatINR(p.price) : 'Price on request'}`
+      );
 
-const msg = encodeURIComponent(
-  `Hello Prime Nature 👋\n\n` +
-  `Product: ${p.name}\n` +
-  `Category: ${p.category || 'N/A'}\n` +
-  `Price: ${p.price ? formatINR(p.price) : 'Price on request'}` +
-  imageLink
-);
+      return `
+        <div class="product-card">
+          <div class="product-image">
+            <img src="${img}" alt="${p.name}">
+          </div>
 
+          <div class="product-details">
+            <h3>${p.name}</h3>
+            <p>${p.description || ''}</p>
+            <div class="product-price">${price}</div>
 
-    return `
-      <div class="product-card">
-        <div class="product-image">
-          <img src="${img}" alt="${p.name}">
-        </div>
-        <div class="product-details">
-          <h3 class="product-name">${p.name}</h3>
-          <p class="product-description">${p.description || ''}</p>
-          <div class="product-price">${price}</div>
-          <div class="product-actions">
-            <button class="btn btn-secondary view-details"
-              data-product='${JSON.stringify(p)}'>View</button>
-            <a class="btn btn-whatsapp" target="_blank"
-              href="https://wa.me/919778757265?text=${msg}">
-              Order
-            </a>
+            <div class="product-actions">
+              <button class="btn btn-secondary"
+                onclick="openProductModal('${p.id}')">
+                View
+              </button>
+
+              <a class="btn btn-whatsapp" target="_blank"
+                 href="https://wa.me/919778757265?text=${message}">
+                 Order
+              </a>
+            </div>
           </div>
         </div>
-      </div>
-    `;
-  }).join('');
-
-  document.querySelectorAll('.view-details').forEach(btn => {
-    btn.addEventListener('click', () => {
-      showProductModal(JSON.parse(btn.dataset.product));
-    });
-  });
+      `;
+    })
+    .join('');
 }
 
 // =====================
-// MODAL
+// MODAL (SAFE)
 // =====================
-function showProductModal(product) {
-  if (!productModal) return;
+function openProductModal(id) {
+  const product = allProducts.find(p => p.id === id);
+  if (!product) return;
 
   document.getElementById('modal-product-image').src = product.image_url;
   document.getElementById('modal-product-name').textContent = product.name;
@@ -206,31 +178,6 @@ function showProductModal(product) {
 }
 
 // =====================
-// UI HELPERS
-// =====================
-function setupMobileMenu() {
-  const btn = document.querySelector('.mobile-menu-btn');
-  const menu = document.querySelector('.mobile-menu');
-  const close = document.querySelector('.mobile-menu-close');
-
-  if (!btn || !menu || !close) return;
-
-  btn.addEventListener('click', () => (menu.style.display = 'flex'));
-  close.addEventListener('click', () => (menu.style.display = 'none'));
-}
-
-function setupSmoothScrolling() {
-  document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', e => {
-      const target = document.querySelector(a.getAttribute('href'));
-      if (!target) return;
-      e.preventDefault();
-      target.scrollIntoView({ behavior: 'smooth' });
-    });
-  });
-}
-
-// =====================
 // REALTIME UPDATES
 // =====================
 let productsChannel = null;
@@ -239,17 +186,11 @@ function setupRealtimeUpdates() {
   if (productsChannel) return;
 
   productsChannel = sb
-    .channel('public-products-realtime')
+    .channel('public-products')
     .on(
       'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'products'
-      },
-      () => {
-        loadProducts();
-      }
+      { event: '*', schema: 'public', table: 'products' },
+      () => loadProducts()
     )
     .subscribe();
 }
