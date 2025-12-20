@@ -67,6 +67,11 @@ p {
     margin-bottom: 0.5rem;
 }
 
+/* Fix: Ensure fixed navbar doesn't cover section titles */
+section[id] {
+    scroll-margin-top: 100px;
+}
+
 .section-title::after {
     content: '';
     position: absolute;
@@ -1039,6 +1044,13 @@ p {
   transition: var(--transition);
   font-family: inherit;
   background-color: var(--white);
+}
+
+/* Fix: Prevent zoom on mobile inputs */
+@media screen and (max-width: 768px) {
+  .search-input {
+    font-size: 16px;
+  }
 }
 
 .search-input:focus {

@@ -134,15 +134,23 @@ function applyFilters() {
 // =====================
 function displayProducts(products) {
   if (!products.length) {
-    productsContainer.innerHTML = `
-      <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
-        <i class="fas fa-leaf" style="font-size: 3rem; color: var(--primary-light); margin-bottom: 15px; opacity: 0.7;"></i>
-        <h3 style="color: var(--primary-color); margin-bottom: 10px;">Coming Soon</h3>
-        <p style="color: var(--text-light); max-width: 400px; margin: 0 auto;">
-          We are currently stocking our shelves with the finest premium nuts and dry fruits. 
-          Please check back shortly!
-        </p>
-      </div>`;
+    // Check if it's a search result (store has items, but filter found none)
+    if (allProducts.length > 0) {
+      productsContainer.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+          <p style="color: var(--text-light); font-size: 1.1rem;">No products match your search.</p>
+        </div>`;
+    } else {
+      productsContainer.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+          <i class="fas fa-leaf" style="font-size: 3rem; color: var(--primary-light); margin-bottom: 15px; opacity: 0.7;"></i>
+          <h3 style="color: var(--primary-color); margin-bottom: 10px;">Coming Soon</h3>
+          <p style="color: var(--text-light); max-width: 400px; margin: 0 auto;">
+            We are currently stocking our shelves with the finest premium nuts and dry fruits. 
+            Please check back shortly!
+          </p>
+        </div>`;
+    }
     return;
   }
 
