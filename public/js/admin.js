@@ -20,6 +20,7 @@ const COMPRESSION_OPTIONS = {
   initialQuality: 0.8
 };
 const STORAGE_SAFETY_LIMIT_MB = 100; // Increased to 100MB
+const BUCKET_NAME = 'product-images'; // CHECK THIS: Must match your Supabase Bucket Name exactly
 
 // =====================
 // INIT
@@ -219,7 +220,7 @@ async function uploadImageToBucket(file) {
   const filePath = `products/${fileName}`;
   
   const { error } = await sb.storage
-    .from('product-images')
+    .from(BUCKET_NAME)
     .upload(filePath, file, {
       contentType: 'image/jpeg',
       upsert: false
@@ -230,7 +231,7 @@ async function uploadImageToBucket(file) {
     return null;
   }
 
-  const { data } = sb.storage.from('product-images').getPublicUrl(filePath);
+  const { data } = sb.storage.from(BUCKET_NAME).getPublicUrl(filePath);
   return data.publicUrl;
 }
 
