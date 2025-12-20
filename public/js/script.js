@@ -3,6 +3,7 @@
 // =====================
 let allProducts = [];
 let activeCategory = 'all';
+let searchQuery = '';
 
 // =====================
 // FORMAT INR
@@ -49,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   setupCategoryFilters();
+  setupSearch();
 
   if (modalCloseBtn && productModal) {
     modalCloseBtn.onclick = () => (productModal.style.display = 'none');
@@ -81,7 +83,7 @@ async function loadProducts() {
   }
 
   allProducts = data;
-  applyCategoryFilter();
+  applyFilters();
 }
 
 // =====================
@@ -96,18 +98,35 @@ function setupCategoryFilters() {
 
       btn.classList.add('active');
       activeCategory = btn.dataset.category;
-      applyCategoryFilter();
+      applyFilters();
     };
   });
 }
 
-function applyCategoryFilter() {
-  const list =
-    activeCategory === 'all'
-      ? allProducts
-      : allProducts.filter(p => p.category === activeCategory);
+function setupSearch() {
+  const searchInput = document.getElementById('product-search');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.toLowerCase().trim();
+      applyFilters();
+    });
+  }
+}
 
-  displayProducts(list);
+function applyFilters() {
+  let filtered = allProducts;
+
+  // 1. Filter by Category
+  if (activeCategory !== 'all') {
+    filtered = filtered.filter(p => p.category === activeCategory);
+  }
+
+  // 2. Filter by Search Query
+  if (searchQuery) {
+    filtered = filtered.filter(p => p.name.toLowerCase().includes(searchQuery));
+  }
+
+  displayProducts(filtered);
 }
 
 // =====================
@@ -215,3 +234,70 @@ function setupRealtimeUpdates() {
     )
     .subscribe();
 }
+
+// =====================
+// SPA NAVIGATION & MOBILE MENU
+// =====================
+document.addEventListener('DOMContentLoaded', () => {
+  // Mobile Menu Elements
+  const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+  const mobileMenu = document.querySelector('.mobile-menu');
+  const mobileMenuClose = document.querySelector('.mobile-menu-close');
+  
+  // Toggle Mobile Menu
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.style.display = 'flex';
+    });
+  }
+  if (mobileMenuClose) {
+    mobileMenuClose.addEventListener('click', () => {
+      mobileMenu.style.display = 'none';
+    });
+  }
+
+  // SPA Navigation Logic
+  const navLinks = document.querySelectorAll('a[href^="#"]');
+  const sections = document.querySelectorAll('section[id]');
+
+  function navigateTo(targetId) {
+    // Logic: Home shows ALL, others show ONLY target
+    if (targetId === 'home') {
+      sections.forEach(sec => sec.style.display = 'block');
+    } else {
+      sections.forEach(sec => {
+        sec.style.display = (sec.id === targetId) ? 'block' : 'none';
+      });
+    }
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Update Active Link
+    navLinks.forEach(link => {
+      if (link.getAttribute('href') === '#' + targetId) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+
+    // Close Mobile Menu
+    if (mobileMenu) mobileMenu.style.display = 'none';
+  }
+
+  // Attach Listeners
+  navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = link.getAttribute('href').substring(1);
+      navigateTo(targetId);
+    });
+  });
+
+  // Handle Initial Hash
+  const hash = window.location.hash.substring(1);
+  if (hash && document.getElementById(hash)) {
+    navigateTo(hash);
+  }
+});
