@@ -143,7 +143,7 @@ function displayAdminProducts(products) {
       <td><img src="${p.image_url}" style="width:50px"></td>
       <td>${p.name}</td>
       <td>${p.category}</td>
-      <td>${p.price ?? 'N/A'}</td>
+      <td>${p.price ? '₹' + p.price : 'N/A'}</td>
       <td>${p.status}</td>
       <td>
         <button onclick="editProduct('${p.id}')">Edit</button>
