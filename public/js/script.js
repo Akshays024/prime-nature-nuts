@@ -1,6 +1,12 @@
 // script.js – Public website (READ-ONLY)
 
 // =====================
+// STATE
+// =====================
+let allProducts = [];
+let activeCategory = 'all';
+
+// =====================
 // FORMAT INR
 // =====================
 const formatINR = amount =>
@@ -40,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupRealtimeUpdates();
   }
 
+  setupCategoryFilters();
   setupMobileMenu();
   setupSmoothScrolling();
 
@@ -74,7 +81,9 @@ async function loadProducts() {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    displayProducts(data);
+
+    allProducts = data;
+    applyCategoryFilter();
 
   } catch (err) {
     console.error(err);
@@ -87,6 +96,37 @@ async function loadProducts() {
   }
 }
 
+// =====================
+// CATEGORY FILTERING
+// =====================
+function setupCategoryFilters() {
+  document.querySelectorAll('.category-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document
+        .querySelectorAll('.category-btn')
+        .forEach(b => b.classList.remove('active'));
+
+      btn.classList.add('active');
+      activeCategory = btn.dataset.category;
+      applyCategoryFilter();
+    });
+  });
+}
+
+function applyCategoryFilter() {
+  if (activeCategory === 'all') {
+    displayProducts(allProducts);
+  } else {
+    const filtered = allProducts.filter(
+      p => p.category === activeCategory
+    );
+    displayProducts(filtered);
+  }
+}
+
+// =====================
+// RENDER PRODUCTS
+// =====================
 function displayProducts(products) {
   if (!products || products.length === 0) {
     productsContainer.innerHTML = `<p>No products available.</p>`;
@@ -187,23 +227,20 @@ function setupSmoothScrolling() {
 let productsChannel = null;
 
 function setupRealtimeUpdates() {
-  if (productsChannel) return; // prevent duplicate subscriptions
+  if (productsChannel) return;
 
   productsChannel = sb
     .channel('public-products-realtime')
     .on(
       'postgres_changes',
       {
-        event: '*',          // INSERT, UPDATE, DELETE
+        event: '*',
         schema: 'public',
         table: 'products'
       },
-      payload => {
-        console.log('Realtime update:', payload);
-        loadProducts(); // instant refresh
+      () => {
+        loadProducts();
       }
     )
-    .subscribe(status => {
-      console.log('Realtime status:', status);
-    });
+    .subscribe();
 }

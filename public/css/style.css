@@ -1017,3 +1017,30 @@ p {
 .page-offset {
   padding-top: 140px;
 }
+.category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0 30px;
+}
+
+.category-btn {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1.5px solid #dcdcdc;
+  background: #fff;
+  color: #2e7d32;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.category-btn:hover {
+  background: #e8f5e9;
+}
+
+.category-btn.active {
+  background: #2e7d32;
+  color: #fff;
+  border-color: #2e7d32;
+}
