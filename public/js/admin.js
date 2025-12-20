@@ -13,8 +13,8 @@ let currentUser = null;
 // =====================
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const COMPRESSION_OPTIONS = {
-  maxSizeMB: 0.5,
-  maxWidthOrHeight: 1200,
+  maxSizeMB: 0.1,
+  maxWidthOrHeight: 800,
   useWebWorker: true,
   fileType: 'image/webp',
   initialQuality: 0.8
@@ -205,7 +205,12 @@ async function deleteProduct(id) {
 // UPLOADED IMAGES
 // =====================
 async function loadUploadedImages() {
-  const { data } = await sb.from('products').select('name,image_url').not('image_url', 'is', null);
+  const { data } = await sb
+    .from('products')
+    .select('name,image_url')
+    .not('image_url', 'is', null)
+    .limit(20);
+    
   document.getElementById('images-grid').innerHTML = data.map(p => `
     <div class="image-card">
       <img src="${p.image_url}">

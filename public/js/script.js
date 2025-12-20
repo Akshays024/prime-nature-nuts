@@ -175,7 +175,7 @@ function displayProducts(products) {
       return `
         <div class="product-card">
           <div class="product-image">
-            <img src="${img}" alt="${p.name}">
+            <img src="${img}" alt="${p.name}" loading="lazy" decoding="async">
           </div>
 
           <div class="product-details">
