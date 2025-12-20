@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Products – Prime Nature</title>
 
-  <link rel="stylesheet" href="public/css/style.css">
+  <link rel="stylesheet" href="public/css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -14,15 +14,34 @@
 
 <section class="products" style="padding-top:140px">
   <div class="container">
+
     <h2 class="section-title">Our Premium Collection</h2>
     <p class="section-subtitle">Handpicked, naturally delicious</p>
 
+    <!-- ✅ CATEGORY FILTERS -->
+    <div class="category-filters">
+      <button class="category-btn active" data-category="all">
+        All Products
+      </button>
+      <button class="category-btn" data-category="Nuts">
+        Premium Nuts
+      </button>
+      <button class="category-btn" data-category="Dry Fruits">
+        Dry Fruits
+      </button>
+      <button class="category-btn" data-category="Seeds">
+        Seeds
+      </button>
+    </div>
+
+    <!-- PRODUCTS -->
     <div class="products-container" id="products-container">
       <div class="loading-products">
         <div class="loading-spinner"></div>
         <p>Loading products...</p>
       </div>
     </div>
+
   </div>
 </section>
 
