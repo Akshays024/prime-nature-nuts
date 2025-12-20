@@ -158,6 +158,7 @@ p {
 
 .logo-icon {
     font-size: 2rem;
+    color: var(--primary-color);
 }
 
 .logo-text {
@@ -665,6 +666,10 @@ p {
 }
 
 .footer-brand .logo-text {
+    color: var(--white);
+}
+
+.footer-brand .logo-icon {
     color: var(--white);
 }
 
