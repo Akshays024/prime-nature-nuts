@@ -26,6 +26,16 @@ let productModal;
 let modalCloseBtn;
 
 // =====================
+// WHATSAPP LINK (MOBILE + DESKTOP SAFE)
+// =====================
+function getWhatsAppLink(phone, message) {
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  return isMobile
+    ? `https://wa.me/${phone}?text=${message}`
+    : `https://web.whatsapp.com/send?phone=${phone}&text=${message}`;
+}
+
+// =====================
 // INIT
 // =====================
 document.addEventListener('DOMContentLoaded', () => {
@@ -65,6 +75,7 @@ async function loadProducts() {
     .order('created_at', { ascending: false });
 
   if (error) {
+    console.error(error);
     productsContainer.innerHTML = `<p>Error loading products</p>`;
     return;
   }
@@ -115,13 +126,15 @@ function displayProducts(products) {
         p.image_url ||
         'https://media.istockphoto.com/id/1127742967/photo/assorted-nuts-on-white-dry-fruits-mix-nuts-almond-cashew-raisins.jpg';
 
-      // SAFE WHATSAPP MESSAGE
+      // SAFE, SHORT, GUARDED MESSAGE
       const message = encodeURIComponent(
         `Hello Prime Nature 👋\n\n` +
-          `Product: ${p.name}\n` +
+          `Product: ${p.name || 'Product'}\n` +
           `Category: ${p.category || 'N/A'}\n` +
           `Price: ${p.price ? formatINR(p.price) : 'Price on request'}`
       );
+
+      const whatsappLink = getWhatsAppLink('919778757265', message);
 
       return `
         <div class="product-card">
@@ -141,7 +154,7 @@ function displayProducts(products) {
               </button>
 
               <a class="btn btn-whatsapp" target="_blank"
-                 href="https://wa.me/919778757265?text=${message}">
+                 href="${whatsappLink}">
                  Order
               </a>
             </div>
@@ -153,7 +166,7 @@ function displayProducts(products) {
 }
 
 // =====================
-// MODAL (SAFE)
+// MODAL
 // =====================
 function openProductModal(id) {
   const product = allProducts.find(p => p.id === id);
