@@ -227,7 +227,7 @@ async function uploadImageToBucket(file) {
     return null;
   }
 
-  const { data } = sb.storage.from('product-image').getPublicUrl(filePath);
+  const { data } = sb.storage.from('product-images').getPublicUrl(filePath);
   return data.publicUrl;
 }
 
