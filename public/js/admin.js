@@ -19,6 +19,7 @@ const COMPRESSION_OPTIONS = {
   fileType: 'image/webp',
   initialQuality: 0.8
 };
+const STORAGE_SAFETY_LIMIT_MB = 100; // Increased to 100MB
 
 // =====================
 // INIT
@@ -135,6 +136,7 @@ async function handleAddProduct(e) {
 async function loadAdminProducts() {
   const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
   if (error) return;
+  calculateStorageUsage(data);
   displayAdminProducts(data);
 }
 
@@ -199,6 +201,38 @@ async function deleteProduct(id) {
   if (!confirm('Delete product?')) return;
   await sb.from('products').delete().eq('id', id);
   loadAdminProducts();
+}
+
+// =====================
+// STORAGE CALCULATOR
+// =====================
+function calculateStorageUsage(products) {
+  let totalBytes = 0;
+  
+  // Sum up the size of all image strings
+  products.forEach(p => {
+    if (p.image_url) totalBytes += p.image_url.length;
+  });
+
+  // Convert to MB
+  const usedMB = (totalBytes / (1024 * 1024)).toFixed(2);
+  const totalMB = STORAGE_SAFETY_LIMIT_MB;
+  const percent = Math.min((usedMB / totalMB) * 100, 100);
+
+  // Update Sidebar
+  const storageInfo = document.getElementById('storage-info');
+  if (storageInfo) storageInfo.textContent = `Storage: ${usedMB}/${totalMB} MB used`;
+
+  // Update Dashboard Meter
+  const usedEl = document.getElementById('used-storage');
+  const totalEl = document.getElementById('total-storage');
+  const fillEl = document.getElementById('meter-fill');
+  const percentEl = document.getElementById('storage-percentage');
+
+  if (usedEl) usedEl.textContent = `${usedMB} MB`;
+  if (totalEl) totalEl.textContent = `${totalMB} MB`;
+  if (fillEl) fillEl.style.width = `${percent}%`;
+  if (percentEl) percentEl.textContent = `${Math.round(percent)}%`;
 }
 
 // =====================
