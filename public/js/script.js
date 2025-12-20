@@ -139,9 +139,18 @@ function displayProducts(products) {
       p.image_url ||
       'https://media.istockphoto.com/id/1127742967/photo/assorted-nuts-on-white-dry-fruits-mix-nuts-almond-cashew-raisins.jpg';
 
-    const msg = encodeURIComponent(
-      `Hello Prime Nature, I would like to order ${p.name}.`
-    );
+   const imageLink = p.image_url
+  ? `\n\nProduct Image:\n${p.image_url}`
+  : '';
+
+const msg = encodeURIComponent(
+  `Hello Prime Nature 👋\n\n` +
+  `Product: ${p.name}\n` +
+  `Category: ${p.category || 'N/A'}\n` +
+  `Price: ${p.price ? formatINR(p.price) : 'Price on request'}` +
+  imageLink
+);
+
 
     return `
       <div class="product-card">
