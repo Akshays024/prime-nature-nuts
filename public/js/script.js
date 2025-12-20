@@ -116,7 +116,7 @@ function displayProducts(products) {
             <button class="btn btn-secondary view-details"
               data-product='${JSON.stringify(p)}'>View</button>
             <a class="btn btn-whatsapp" target="_blank"
-              href="https://wa.me/1234567890?text=${msg}">
+              href="https://wa.me/919778757265?text=${msg}">
               Order
             </a>
           </div>
