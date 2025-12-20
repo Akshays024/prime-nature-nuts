@@ -16,7 +16,7 @@ const COMPRESSION_OPTIONS = {
   maxSizeMB: 0.1,
   maxWidthOrHeight: 800,
   useWebWorker: true,
-  fileType: 'image/webp',
+  fileType: 'image/jpeg',
   initialQuality: 0.8
 };
 const STORAGE_SAFETY_LIMIT_MB = 100; // Increased to 100MB
@@ -215,12 +215,15 @@ async function deleteProduct(id) {
 // STORAGE UPLOAD HELPER
 // =====================
 async function uploadImageToBucket(file) {
-  const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
   const filePath = `products/${fileName}`;
   
   const { error } = await sb.storage
     .from('product-images')
-    .upload(filePath, file);
+    .upload(filePath, file, {
+      contentType: 'image/jpeg',
+      upsert: false
+    });
 
   if (error) {
     showNotification('Image upload failed: ' + error.message, 'error');
