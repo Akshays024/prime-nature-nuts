@@ -116,6 +116,7 @@ async function handleAddProduct(e) {
   const product = {
     name: document.getElementById('product-name').value.trim(),
     category: document.getElementById('product-category').value,
+    weight: document.getElementById('product-weight').value.trim(),
     price: document.getElementById('product-price').value || null,
     description: document.getElementById('product-description').value,
     status: document.getElementById('product-status').value,
@@ -143,6 +144,7 @@ function displayAdminProducts(products) {
       <td><img src="${p.image_url}" style="width:50px"></td>
       <td>${p.name}</td>
       <td>${p.category}</td>
+      <td>${p.weight || '-'}</td>
       <td>${p.price ? '₹' + p.price : 'N/A'}</td>
       <td>${p.status}</td>
       <td>
@@ -159,6 +161,7 @@ async function editProduct(id) {
   document.getElementById('edit-product-id').value = data.id;
   document.getElementById('edit-product-name').value = data.name;
   document.getElementById('edit-product-category').value = data.category;
+  document.getElementById('edit-product-weight').value = data.weight || '';
   document.getElementById('edit-product-price').value = data.price || '';
   document.getElementById('edit-product-description').value = data.description || '';
   document.getElementById('edit-product-status').value = data.status;
@@ -177,6 +180,7 @@ async function handleEditProduct(e) {
   const update = {
     name: document.getElementById('edit-product-name').value,
     category: document.getElementById('edit-product-category').value,
+    weight: document.getElementById('edit-product-weight').value,
     price: document.getElementById('edit-product-price').value || null,
     description: document.getElementById('edit-product-description').value,
     status: document.getElementById('edit-product-status').value

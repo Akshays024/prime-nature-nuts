@@ -166,6 +166,7 @@ function displayProducts(products) {
         `Hello Prime Nature 👋\n\n` +
           `Product: ${p.name || 'Product'}\n` +
           `Category: ${p.category || 'N/A'}\n` +
+          (p.weight ? `Weight: ${p.weight}\n` : '') +
           `Price: ${p.price ? formatINR(p.price) : 'Price on request'}`
       );
 
@@ -180,6 +181,7 @@ function displayProducts(products) {
           <div class="product-details">
             <h3>${p.name}</h3>
             <p>${p.description || ''}</p>
+            ${p.weight ? `<div class="product-weight" style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 5px;">${p.weight}</div>` : ''}
             <div class="product-price">${price}</div>
 
             <div class="product-actions">
@@ -217,7 +219,9 @@ function openProductModal(id) {
 
   if (product.price) {
     priceBox.style.display = 'block';
-    priceText.textContent = formatINR(product.price);
+    priceText.textContent = product.weight 
+      ? `${formatINR(product.price)} / ${product.weight}`
+      : formatINR(product.price);
   } else {
     priceBox.style.display = 'none';
   }
