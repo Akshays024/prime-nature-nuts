@@ -217,7 +217,6 @@ function displayProducts(products) {
 
           <div class="product-details">
             <h3>${p.name}</h3>
-            <p>${p.description || ''}</p>
             ${p.weight ? `<div class="product-weight">${p.weight}</div>` : ''}
             <div class="product-price">${price}</div>
 
@@ -246,24 +245,56 @@ function openProductModal(id) {
   const product = allProducts.find(p => p.id === id);
   if (!product) return;
 
-  document.getElementById('modal-product-image').src = product.image_url;
-  document.getElementById('modal-product-name').textContent = product.name;
-  document.getElementById('modal-product-description').textContent =
-    product.description || '';
+  // Dynamic Content Generation to ensure order: Image -> Name -> Price/Weight -> Description
+  const priceInfo = product.price 
+    ? `<div style="font-size: 1.1rem; color: var(--primary-color); margin: 10px 0; font-weight: bold;">
+         ${formatINR(product.price)} 
+         ${product.weight ? `<span style="font-size: 0.9rem; color: #666; font-weight: normal;">/ ${product.weight}</span>` : ''}
+       </div>`
+    : '';
 
-  const priceBox = document.getElementById('modal-price-container');
-  const priceText = document.getElementById('modal-product-price');
+  const description = product.description 
+    ? `<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; text-align: left;">
+         <strong style="display: block; margin-bottom: 5px;">Description:</strong>
+         <p style="white-space: pre-wrap; color: #444; margin: 0;">${product.description}</p>
+       </div>`
+    : '';
 
-  if (product.price) {
-    priceBox.style.display = 'block';
-    priceText.textContent = product.weight 
-      ? `${formatINR(product.price)} / ${product.weight}`
-      : formatINR(product.price);
-  } else {
-    priceBox.style.display = 'none';
-  }
+  // WhatsApp Message
+  const message = encodeURIComponent(
+    `Hello Prime Nature 👋\n\nI am interested in: ${product.name}\nPrice: ${product.price ? formatINR(product.price) : 'N/A'}`
+  );
+  const whatsappLink = getWhatsAppLink('919778757265', message);
+
+  productModal.innerHTML = `
+    <div class="modal-content" style="background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; position: relative; max-height: 90vh; overflow-y: auto;">
+      <button id="dynamic-modal-close" style="position: absolute; right: 15px; top: 10px; background: none; border: none; font-size: 28px; cursor: pointer; color: #666;">&times;</button>
+      
+      <div style="text-align: center;">
+        <img src="${product.image_url}" alt="${product.name}" style="max-width: 100%; height: auto; max-height: 300px; border-radius: 8px; margin-bottom: 15px;">
+        
+        <h2 style="margin: 0 0 5px 0; color: #333;">${product.name}</h2>
+        ${priceInfo}
+        
+        ${description}
+
+        <div style="margin-top: 20px;">
+          <a href="${whatsappLink}" target="_blank" class="btn btn-whatsapp" style="width: 100%; text-align: center; display: block;">
+            Order Now
+          </a>
+        </div>
+      </div>
+    </div>
+  `;
 
   productModal.style.display = 'flex';
+  productModal.style.justifyContent = 'center';
+  productModal.style.alignItems = 'center';
+
+  // Attach Close Event
+  document.getElementById('dynamic-modal-close').onclick = () => {
+    productModal.style.display = 'none';
+  };
 }
 
 // =====================

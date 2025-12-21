@@ -155,11 +155,56 @@ function displayAdminProducts(products) {
       <td>${p.price ? '₹' + p.price : 'N/A'}</td>
       <td>${p.status}</td>
       <td>
+        <button onclick="viewProduct('${p.id}')">View</button>
         <button onclick="editProduct('${p.id}')">Edit</button>
         <button onclick="deleteProduct('${p.id}')">Delete</button>
       </td>
     </tr>
   `).join('');
+}
+
+async function viewProduct(id) {
+  const { data, error } = await sb.from('products').select('*').eq('id', id).single();
+  if (error || !data) return showNotification('Error loading details', 'error');
+
+  // Create a simple modal overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'view-modal-overlay';
+  overlay.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 10000;
+  `;
+
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px;
+    max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  `;
+
+  // Content: Image, Name, Price, Weight (1st), then Description
+  modal.innerHTML = `
+    <button onclick="document.getElementById('view-modal-overlay').remove()" style="position: absolute; right: 15px; top: 10px; border: none; background: none; font-size: 24px; cursor: pointer;">&times;</button>
+    <div style="text-align: center; margin-bottom: 15px;">
+      <img src="${data.image_url}" style="max-width: 100%; max-height: 250px; border-radius: 4px;">
+    </div>
+    <h3 style="margin: 0 0 10px 0;">${data.name}</h3>
+    <div style="display: flex; gap: 15px; margin-bottom: 15px; color: #666;">
+      <span><strong>Price:</strong> ₹${data.price || 'N/A'}</span>
+      <span><strong>Weight:</strong> ${data.weight || '-'}</span>
+    </div>
+    <div style="border-top: 1px solid #eee; padding-top: 15px;">
+      <strong>Description:</strong>
+      <p style="margin-top: 5px; white-space: pre-wrap;">${data.description || 'No description.'}</p>
+    </div>
+  `;
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  // Close when clicking outside
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
 }
 
 async function editProduct(id) {
@@ -384,6 +429,7 @@ function showNotification(msg, type) {
 // =====================
 // GLOBAL
 // =====================
+window.viewProduct = viewProduct;
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
 window.clearImagePreview = clearImagePreview;
