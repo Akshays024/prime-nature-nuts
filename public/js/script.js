@@ -242,8 +242,22 @@ function displayProducts(products) {
 // MODAL
 // =====================
 function openProductModal(id) {
-  const product = allProducts.find(p => p.id === id);
+  const product = allProducts.find(p => p.id == id);
   if (!product) return;
+
+  // Ensure modal container exists (Self-healing if HTML is missing)
+  if (!productModal) {
+    productModal = document.getElementById('product-modal');
+    if (!productModal) {
+      productModal = document.createElement('div');
+      productModal.id = 'product-modal';
+      productModal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: none; justify-content: center; align-items: center;';
+      document.body.appendChild(productModal);
+      productModal.onclick = e => {
+        if (e.target === productModal) productModal.style.display = 'none';
+      };
+    }
+  }
 
   // Dynamic Content Generation to ensure order: Image -> Name -> Price/Weight -> Description
   const priceInfo = product.price 
