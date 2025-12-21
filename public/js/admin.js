@@ -113,11 +113,8 @@ async function handleAddProduct(e) {
   e.preventDefault();
 
   const preview = document.getElementById('image-preview');
-  if (!preview.uploadFile) return showNotification('Image required', 'error');
-
-  // 1. Upload Image to Supabase Storage
-  const imageUrl = await uploadImageToBucket(preview.uploadFile);
-  if (!imageUrl) return; // Error handled in helper
+  const files = preview.uploadFiles || [];
+  if (files.length === 0) return showNotification('Image required', 'error');
 
   const product = {
     name: document.getElementById('product-name').value.trim(),
@@ -125,11 +122,30 @@ async function handleAddProduct(e) {
     weight: document.getElementById('product-weight').value.trim(),
     price: document.getElementById('product-price').value || null,
     description: document.getElementById('product-description').value,
-    status: document.getElementById('product-status').value,
-    image_url: imageUrl
+    status: document.getElementById('product-status').value
   };
 
-  const { error } = await sb.from('products').insert([product]);
+  showNotification('Uploading product...', 'info');
+
+  // Upload all images
+  const imageUrls = [];
+  for (const file of files) {
+    const url = await uploadImageToBucket(file);
+    if (url) imageUrls.push(url);
+  }
+
+  if (imageUrls.length === 0) return showNotification('Image upload failed', 'error');
+
+  // Store as string if single, JSON string if multiple
+  const finalImageUrl = imageUrls.length === 1 
+    ? imageUrls[0] 
+    : JSON.stringify(imageUrls);
+
+  const { error } = await sb.from('products').insert([{
+    ...product,
+    image_url: finalImageUrl
+  }]);
+
   if (error) return showNotification(error.message, 'error');
 
   showNotification('Product added', 'success');
@@ -148,7 +164,7 @@ async function loadAdminProducts() {
 function displayAdminProducts(products) {
   document.getElementById('products-table-body').innerHTML = products.map(p => `
     <tr>
-      <td><img src="${p.image_url}" style="width:50px"></td>
+      <td><img src="${getThumbnailUrl(p.image_url)}" style="width:50px"></td>
       <td>${p.name}</td>
       <td>${p.category}</td>
       <td>${p.weight || '-'}</td>
@@ -177,7 +193,7 @@ async function viewProduct(id) {
 
   const modal = document.createElement('div');
   modal.style.cssText = `
-    background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px;
+    background: white; padding: 20px; border-radius: 8px; width: 95%; max-width: 500px;
     max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   `;
 
@@ -185,7 +201,7 @@ async function viewProduct(id) {
   modal.innerHTML = `
     <button onclick="document.getElementById('view-modal-overlay').remove()" style="position: absolute; right: 15px; top: 10px; border: none; background: none; font-size: 24px; cursor: pointer;">&times;</button>
     <div style="text-align: center; margin-bottom: 15px;">
-      <img src="${data.image_url}" style="max-width: 100%; max-height: 250px; border-radius: 4px;">
+      ${getImageHtml(data.image_url)}
     </div>
     <h3 style="margin: 0 0 10px 0;">${data.name}</h3>
     <div style="display: flex; gap: 15px; margin-bottom: 15px; color: #666;">
@@ -207,6 +223,32 @@ async function viewProduct(id) {
   });
 }
 
+function getImageHtml(imageField) {
+  if (!imageField) return '';
+
+  if (imageField && imageField.startsWith('[')) {
+    try { 
+      const images = JSON.parse(imageField);
+      return `<div style="display: flex; gap: 5px; overflow-x: auto; justify-content: center; padding-bottom: 10px;">
+        ${images.map(src => `<img src="${src}" style="height: 150px; width: auto; border-radius: 4px; border: 1px solid #ddd;">`).join('')}
+      </div>`;
+    } catch(e) {
+      return `<img src="${imageField}" style="max-width: 100%; max-height: 250px; border-radius: 4px;">`;
+    }
+  }
+  return `<img src="${imageField}" style="max-width: 100%; max-height: 250px; border-radius: 4px;">`;
+}
+
+function getThumbnailUrl(imageField) {
+  if (!imageField) return '';
+  if (imageField.startsWith('[')) {
+    try {
+      return JSON.parse(imageField)[0] || '';
+    } catch(e) { return imageField; }
+  }
+  return imageField;
+}
+
 async function editProduct(id) {
   const { data } = await sb.from('products').select('*').eq('id', id).single();
 
@@ -218,7 +260,12 @@ async function editProduct(id) {
   document.getElementById('edit-product-description').value = data.description || '';
   document.getElementById('edit-product-status').value = data.status;
 
-  document.getElementById('edit-current-image').src = data.image_url;
+  // Handle Image Preview in Edit
+  let imgSrc = data.image_url;
+  if (imgSrc && imgSrc.startsWith('[')) {
+    try { imgSrc = JSON.parse(imgSrc)[0]; } catch(e) {}
+  }
+  document.getElementById('edit-current-image').src = imgSrc;
   document.getElementById('current-image').style.display = 'block';
   document.getElementById('edit-product-modal').style.display = 'flex';
 }
@@ -238,10 +285,16 @@ async function handleEditProduct(e) {
     status: document.getElementById('edit-product-status').value
   };
 
-  // If a new image was selected, upload it
-  if (preview.uploadFile) {
-    const imageUrl = await uploadImageToBucket(preview.uploadFile);
-    if (imageUrl) update.image_url = imageUrl;
+  // If new images selected, upload and replace
+  if (preview.uploadFiles && preview.uploadFiles.length > 0) {
+    const imageUrls = [];
+    for (const file of preview.uploadFiles) {
+      const url = await uploadImageToBucket(file);
+      if (url) imageUrls.push(url);
+    }
+    if (imageUrls.length > 0) {
+      update.image_url = imageUrls.length === 1 ? imageUrls[0] : JSON.stringify(imageUrls);
+    }
   }
 
   await sb.from('products').update(update).eq('id', id);
@@ -324,7 +377,7 @@ async function loadUploadedImages() {
     
   document.getElementById('images-grid').innerHTML = data.map(p => `
     <div class="image-card">
-      <img src="${p.image_url}">
+      <img src="${getThumbnailUrl(p.image_url)}">
       <div class="image-name">${p.name}</div>
     </div>
   `).join('');
@@ -343,24 +396,65 @@ function setupUploadArea(areaId, inputId, previewId) {
   const input = document.getElementById(inputId);
   const preview = document.getElementById(previewId);
 
-  area.onclick = () => input.click();
-  input.onchange = e => handleImageUpload(e.target.files[0], preview);
+  // Prevent clicking area when clicking remove button
+  area.onclick = (e) => {
+    if (e.target.tagName !== 'BUTTON') input.click();
+  };
+
+  input.onchange = e => {
+    const newFiles = Array.from(e.target.files);
+    if (newFiles.length === 0) return;
+
+    // Cumulative: Append new files to existing ones
+    // For Edit mode, we might want to replace, but let's stick to cumulative for consistency
+    // unless it's the very first selection.
+    if (!preview.uploadFiles) preview.uploadFiles = [];
+    
+    handleImageUpload(newFiles, preview);
+    input.value = ''; // Reset to allow selecting same file again
+  };
 }
 
-async function handleImageUpload(file, preview) {
-  try {
-    const compressed = await resizeImage(file, COMPRESSION_OPTIONS.maxWidthOrHeight, COMPRESSION_OPTIONS.initialQuality);
-    const reader = new FileReader();
-    reader.onload = e => {
-      preview.dataset.imageData = e.target.result;
-      preview.uploadFile = compressed; // Store file for upload
-      preview.innerHTML = `<img src="${e.target.result}" style="max-width:100%">`;
-    };
-    reader.readAsDataURL(compressed);
-  } catch (error) {
-    console.error('Image processing failed:', error);
-    showNotification('Failed to process image', 'error');
+async function handleImageUpload(newFiles, preview) {
+  if (!preview.uploadFiles) preview.uploadFiles = [];
+
+  // Process new files
+  for (const file of newFiles) {
+    try {
+      const compressed = await resizeImage(file, COMPRESSION_OPTIONS.maxWidthOrHeight, COMPRESSION_OPTIONS.initialQuality);
+      preview.uploadFiles.push(compressed);
+    } catch (error) {
+      console.error('Image processing failed:', error);
+      showNotification('Failed to process image', 'error');
+    }
   }
+
+  renderImagePreview(preview);
+}
+
+function renderImagePreview(preview) {
+  preview.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; width: 100%; padding: 10px;';
+  
+  preview.uploadFiles.forEach((file, index) => {
+    const div = document.createElement('div');
+    div.style.cssText = 'position: relative; aspect-ratio: 1;';
+    
+    div.innerHTML = `
+      <img src="${URL.createObjectURL(file)}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">
+      <button type="button" onclick="removeImage(this, '${preview.id}', ${index})" 
+        style="position: absolute; top: -5px; right: -5px; background: red; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px;">&times;</button>
+    `;
+    grid.appendChild(div);
+  });
+  preview.appendChild(grid);
+}
+
+function removeImage(btn, previewId, index) {
+  const preview = document.getElementById(previewId);
+  preview.uploadFiles.splice(index, 1);
+  renderImagePreview(preview);
 }
 
 function resizeImage(file, maxSize, quality) {
@@ -409,9 +503,12 @@ function resizeImage(file, maxSize, quality) {
 
 function clearImagePreview() {
   const p = document.getElementById('image-preview');
-  p.innerHTML = '';
-  delete p.dataset.imageData;
-  delete p.uploadFile;
+  p.innerHTML = `
+    <div class="preview-placeholder">
+        <i class="fas fa-image"></i>
+        <p>No image selected</p>
+    </div>`;
+  delete p.uploadFiles;
 }
 
 function closeEditModal() {
@@ -433,6 +530,7 @@ window.viewProduct = viewProduct;
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
 window.clearImagePreview = clearImagePreview;
+window.removeImage = removeImage;
 // =====================
 // MOBILE SIDEBAR FIX (ADDED)
 // =====================

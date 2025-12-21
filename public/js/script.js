@@ -194,9 +194,7 @@ function displayProducts(products) {
   productsContainer.innerHTML = products
     .map(p => {
       const price = p.price ? formatINR(p.price) : 'Price on request';
-      const img =
-        p.image_url ||
-        'https://media.istockphoto.com/id/1127742967/photo/assorted-nuts-on-white-dry-fruits-mix-nuts-almond-cashew-raisins.jpg';
+      const img = getProductImage(p);
 
       // SAFE, SHORT, GUARDED MESSAGE
       const message = encodeURIComponent(
@@ -245,6 +243,10 @@ function openProductModal(id) {
   const product = allProducts.find(p => p.id == id);
   if (!product) return;
 
+  // Get all images (if multiple)
+  const images = getProductImagesArray(product);
+  const mainImage = images[0];
+
   // Ensure modal container exists (Self-healing if HTML is missing)
   if (!productModal) {
     productModal = document.getElementById('product-modal');
@@ -259,9 +261,34 @@ function openProductModal(id) {
     }
   }
 
+  // QUANTITY SELECTOR LOGIC
+  const baseGrams = parseWeightToGrams(product.weight);
+  const hasSelector = baseGrams && product.price;
+  let selectorHtml = '';
+
+  if (hasSelector) {
+    const pricePerGram = product.price / baseGrams;
+    const options = [100, 250, 500, 1000]; // Standard sizes
+    
+    selectorHtml = `
+      <div style="margin: 15px 0; text-align: left;">
+        <label style="font-size: 0.9rem; color: #666; font-weight: 600; margin-bottom: 5px; display: block;">Select Quantity</label>
+        <select id="modal-weight-select" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; background: #f9f9f9; cursor: pointer;">
+          ${options.map(g => {
+            const p = Math.ceil(pricePerGram * g);
+            const lbl = g >= 1000 ? (g/1000)+'kg' : g+'g';
+            // Select 1kg by default if available, otherwise select the base weight if it matches
+            const selected = (g === baseGrams) ? 'selected' : ''; 
+            return `<option value="${g}" data-price="${p}" data-label="${lbl}" ${selected}>${lbl} - ${formatINR(p)}</option>`;
+          }).join('')}
+        </select>
+      </div>
+    `;
+  }
+
   // Dynamic Content Generation to ensure order: Image -> Name -> Price/Weight -> Description
-  const priceInfo = product.price 
-    ? `<div style="font-size: 1.1rem; color: var(--primary-color); margin: 10px 0; font-weight: bold;">
+  const priceInfo = product.price
+    ? `<div id="modal-price-display" style="font-size: 1.2rem; color: var(--primary-color); margin: 10px 0; font-weight: bold;">
          ${formatINR(product.price)} 
          ${product.weight ? `<span style="font-size: 0.9rem; color: #666; font-weight: normal;">/ ${product.weight}</span>` : ''}
        </div>`
@@ -281,20 +308,29 @@ function openProductModal(id) {
   const whatsappLink = getWhatsAppLink('919778757265', message);
 
   productModal.innerHTML = `
-    <div class="modal-content" style="background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; position: relative; max-height: 90vh; overflow-y: auto;">
+    <div class="modal-content" style="background: white; padding: 20px; border-radius: 12px; max-width: 500px; width: 95%; position: relative; max-height: 90vh; overflow-y: auto;">
       <button id="dynamic-modal-close" style="position: absolute; right: 15px; top: 10px; background: none; border: none; font-size: 28px; cursor: pointer; color: #666;">&times;</button>
       
       <div style="text-align: center;">
-        <img src="${product.image_url}" alt="${product.name}" style="max-width: 100%; height: auto; max-height: 300px; border-radius: 8px; margin-bottom: 15px;">
+        <img src="${mainImage}" alt="${product.name}" style="max-width: 100%; height: auto; max-height: 300px; border-radius: 8px; margin-bottom: 15px;">
         
+        ${images.length > 1 ? `
+          <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; overflow-x: auto;">
+            ${images.map(img => `
+              <img src="${img}" onclick="this.parentElement.previousElementSibling.src='${img}'" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid #ddd;">
+            `).join('')}
+          </div>
+        ` : ''}
+
         <h2 style="margin: 0 0 5px 0; color: #333;">${product.name}</h2>
         <div style="color: #666; font-size: 0.9rem; margin-bottom: 10px;">${product.category}</div>
+        ${selectorHtml}
         ${priceInfo}
         
         ${description}
 
         <div style="margin-top: 20px;">
-          <a href="${whatsappLink}" target="_blank" class="btn btn-whatsapp" style="width: 100%; text-align: center; display: block;">
+          <a id="modal-order-btn" href="${whatsappLink}" target="_blank" class="btn btn-whatsapp" style="width: 100%; text-align: center; display: block;">
             Order Now
           </a>
         </div>
@@ -310,10 +346,70 @@ function openProductModal(id) {
   document.getElementById('dynamic-modal-close').onclick = () => {
     productModal.style.display = 'none';
   };
+
+  // Attach Event Listener for Quantity Change
+  if (hasSelector) {
+    const select = document.getElementById('modal-weight-select');
+    const priceDisplay = document.getElementById('modal-price-display');
+    const orderBtn = document.getElementById('modal-order-btn');
+
+    const updateState = () => {
+      const opt = select.options[select.selectedIndex];
+      const price = opt.dataset.price;
+      const weightLabel = opt.dataset.label;
+
+      // Update Price UI
+      priceDisplay.innerHTML = `${formatINR(price)} <span style="font-size: 0.9rem; color: #666; font-weight: normal;">/ ${weightLabel}</span>`;
+
+      // Update WhatsApp Link
+      const msg = encodeURIComponent(`Hello Prime Nature 👋\n\nI am interested in: ${product.name}\nQuantity: ${weightLabel}\nPrice: ${formatINR(price)}`);
+      orderBtn.href = getWhatsAppLink('919778757265', msg);
+    };
+
+    select.addEventListener('change', updateState);
+    // Initialize with default selection (in case base weight isn't the first option)
+    updateState();
+  }
 }
 
 // Expose to window for HTML onclick
 window.openProductModal = openProductModal;
+
+// =====================
+// HELPERS
+// =====================
+function getProductImage(p) {
+  if (!p.image_url) return 'https://media.istockphoto.com/id/1127742967/photo/assorted-nuts-on-white-dry-fruits-mix-nuts-almond-cashew-raisins.jpg';
+  
+  if (p.image_url.startsWith('[')) {
+    try {
+      const imgs = JSON.parse(p.image_url);
+      return imgs[0];
+    } catch (e) { return p.image_url; }
+  }
+  return p.image_url;
+}
+
+function getProductImagesArray(p) {
+  if (!p.image_url) return ['https://media.istockphoto.com/id/1127742967/photo/assorted-nuts-on-white-dry-fruits-mix-nuts-almond-cashew-raisins.jpg'];
+  if (p.image_url.startsWith('[')) {
+    try { return JSON.parse(p.image_url); } catch (e) { return [p.image_url]; }
+  }
+  return [p.image_url];
+}
+
+function parseWeightToGrams(str) {
+  if (!str) return null;
+  // Normalize: "1 kg" -> "1kg", "500 g" -> "500g"
+  const clean = str.toLowerCase().replace(/[^0-9.kg]/g, '');
+  
+  if (clean.includes('kg')) {
+    return parseFloat(clean) * 1000;
+  } else if (clean.includes('g')) {
+    return parseFloat(clean);
+  }
+  return null;
+}
 
 // =====================
 // REALTIME UPDATES

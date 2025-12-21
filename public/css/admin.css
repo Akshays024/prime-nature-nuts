@@ -838,9 +838,10 @@ body {
     }
     
     .admin-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
     }
     
     .form-row {
@@ -884,5 +885,6 @@ body {
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        margin-right: 10px;
     }
 }
