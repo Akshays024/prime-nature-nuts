@@ -455,13 +455,25 @@ document.addEventListener('DOMContentLoaded', () => {
   const sections = document.querySelectorAll('section[id]');
 
   function navigateTo(targetId) {
+    const viewAllBtn = document.getElementById('view-all-products-btn');
+
     // Logic: Home shows ALL, others show ONLY target
     if (targetId === 'home') {
       sections.forEach(sec => sec.style.display = 'block');
+      
+      // Reset to limited view on Home
+      if (productsContainer) productsContainer.classList.add('limited-view');
+      if (viewAllBtn) viewAllBtn.style.display = 'inline-flex';
     } else {
       sections.forEach(sec => {
         sec.style.display = (sec.id === targetId) ? 'block' : 'none';
       });
+
+      // Expand products if viewing Products section
+      if (targetId === 'products') {
+        if (productsContainer) productsContainer.classList.remove('limited-view');
+        if (viewAllBtn) viewAllBtn.style.display = 'none';
+      }
     }
     
     // Scroll to top

@@ -1192,3 +1192,8 @@ section[id] {
     from { transform: translateX(-10px); }
     to { transform: translateX(10px); }
 }
+
+/* Limit product display (e.g. for Home Page) */
+.products-container.limited-view > div:nth-child(n+9) {
+    display: none;
+}
