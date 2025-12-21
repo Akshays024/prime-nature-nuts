@@ -662,10 +662,7 @@ section[id] {
     background-color: var(--white);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
+    overflow: hidden;
 }
 
 .map-content {
