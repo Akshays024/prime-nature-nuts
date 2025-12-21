@@ -303,14 +303,63 @@ function setupUploadArea(areaId, inputId, previewId) {
 }
 
 async function handleImageUpload(file, preview) {
-  const compressed = await imageCompression(file, COMPRESSION_OPTIONS);
-  const reader = new FileReader();
-  reader.onload = e => {
-    preview.dataset.imageData = e.target.result;
-    preview.uploadFile = compressed; // Store file for upload
-    preview.innerHTML = `<img src="${e.target.result}" style="max-width:100%">`;
-  };
-  reader.readAsDataURL(compressed);
+  try {
+    const compressed = await resizeImage(file, COMPRESSION_OPTIONS.maxWidthOrHeight, COMPRESSION_OPTIONS.initialQuality);
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.dataset.imageData = e.target.result;
+      preview.uploadFile = compressed; // Store file for upload
+      preview.innerHTML = `<img src="${e.target.result}" style="max-width:100%">`;
+    };
+    reader.readAsDataURL(compressed);
+  } catch (error) {
+    console.error('Image processing failed:', error);
+    showNotification('Failed to process image', 'error');
+  }
+}
+
+function resizeImage(file, maxSize, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = event => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxSize) {
+            height = Math.round(height * (maxSize / width));
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width = Math.round(width * (maxSize / height));
+            height = maxSize;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob(blob => {
+          if (!blob) return reject(new Error('Compression failed'));
+          resolve(new File([blob], file.name, {
+            type: 'image/jpeg',
+            lastModified: Date.now()
+          }));
+        }, 'image/jpeg', quality);
+      };
+      img.onerror = error => reject(error);
+    };
+    reader.onerror = error => reject(error);
+  });
 }
 
 function clearImagePreview() {
