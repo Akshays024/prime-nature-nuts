@@ -274,6 +274,7 @@ function openProductModal(id) {
         <img src="${product.image_url}" alt="${product.name}" style="max-width: 100%; height: auto; max-height: 300px; border-radius: 8px; margin-bottom: 15px;">
         
         <h2 style="margin: 0 0 5px 0; color: #333;">${product.name}</h2>
+        <div style="color: #666; font-size: 0.9rem; margin-bottom: 10px;">${product.category}</div>
         ${priceInfo}
         
         ${description}
@@ -296,6 +297,9 @@ function openProductModal(id) {
     productModal.style.display = 'none';
   };
 }
+
+// Expose to window for HTML onclick
+window.openProductModal = openProductModal;
 
 // =====================
 // REALTIME UPDATES
