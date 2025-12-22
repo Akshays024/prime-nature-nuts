@@ -52,6 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setupCategoryFilters();
   setupSearch();
   setupThemeToggle();
+  setupAboutSection();
+  setupScrollAnimations();
 
   if (modalCloseBtn && productModal) {
     modalCloseBtn.onclick = () => (productModal.style.display = 'none');
@@ -98,6 +100,69 @@ function setupThemeToggle() {
 }
 
 // =====================
+// ABOUT SECTION
+// =====================
+function setupAboutSection() {
+  const aboutSection = document.getElementById('about');
+  if (!aboutSection) return;
+
+  // Inject into container for better alignment
+  const target = aboutSection.querySelector('.container') || aboutSection;
+
+  // Avoid duplicates
+  if (target.querySelector('.about-enhancement')) return;
+
+  const content = `
+    <div class="about-enhancement reveal" style="margin-top: 2rem;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        
+        <div style="text-align: center; padding: 1.5rem; background: var(--card-bg, #fff); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <i class="fas fa-leaf" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+          <h3 style="margin-bottom: 0.5rem; color: var(--text-color, #333);">100% Natural</h3>
+          <p style="color: var(--text-light); font-size: 0.9rem; line-height: 1.5;">
+            Sourced directly from the finest farms to ensure purity and freshness in every bite.
+          </p>
+        </div>
+
+        <div style="text-align: center; padding: 1.5rem; background: var(--card-bg, #fff); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <i class="fas fa-heart" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+          <h3 style="margin-bottom: 0.5rem; color: var(--text-color, #333);">Premium Quality</h3>
+          <p style="color: var(--text-light); font-size: 0.9rem; line-height: 1.5;">
+            Handpicked selection of nuts and dry fruits, rich in nutrients and flavor.
+          </p>
+        </div>
+
+        <div style="text-align: center; padding: 1.5rem; background: var(--card-bg, #fff); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <i class="fas fa-shipping-fast" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+          <h3 style="margin-bottom: 0.5rem; color: var(--text-color, #333);">Fast Delivery</h3>
+          <p style="color: var(--text-light); font-size: 0.9rem; line-height: 1.5;">
+            Quick and reliable shipping to bring healthy goodness right to your doorstep.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  `;
+  
+  target.insertAdjacentHTML('beforeend', content);
+}
+
+// =====================
+// SCROLL ANIMATIONS
+// =====================
+function setupScrollAnimations() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('active');
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+}
+
+// =====================
 // LOAD PRODUCTS
 // =====================
 async function loadProducts() {
@@ -110,7 +175,7 @@ async function loadProducts() {
 
   const { data, error } = await sb
     .from('products')
-    .select('*')
+    .select('id, name, category, price, weight, image_url, created_at')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -294,12 +359,10 @@ function openProductModal(id) {
        </div>`
     : '';
 
-  const description = product.description 
-    ? `<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; text-align: left;">
-         <strong style="display: block; margin-bottom: 5px;">Description:</strong>
-         <p style="white-space: pre-wrap; color: #444; margin: 0;">${product.description}</p>
-       </div>`
-    : '';
+  // Placeholder for description (fetched asynchronously to speed up initial load)
+  const descriptionHtml = `<div id="modal-desc-content" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; text-align: left;">
+         <p style="color: #888; font-size: 0.9rem; margin: 0;">Loading details...</p>
+       </div>`;
 
   // WhatsApp Message
   const message = encodeURIComponent(
@@ -327,7 +390,7 @@ function openProductModal(id) {
         ${selectorHtml}
         ${priceInfo}
         
-        ${description}
+        ${descriptionHtml}
 
         <div style="margin-top: 20px;">
           <a id="modal-order-btn" href="${whatsappLink}" target="_blank" class="btn btn-whatsapp" style="width: 100%; text-align: center; display: block;">
@@ -341,6 +404,20 @@ function openProductModal(id) {
   productModal.style.display = 'flex';
   productModal.style.justifyContent = 'center';
   productModal.style.alignItems = 'center';
+
+  // Fetch Description Separately
+  sb.from('products')
+    .select('description')
+    .eq('id', id)
+    .single()
+    .then(({ data }) => {
+      const container = document.getElementById('modal-desc-content');
+      if (container && data && data.description) {
+        container.innerHTML = `<strong style="display: block; margin-bottom: 5px;">Description:</strong><p style="white-space: pre-wrap; color: #444; margin: 0;">${data.description}</p>`;
+      } else if (container) {
+        container.style.display = 'none';
+      }
+    });
 
   // Attach Close Event
   document.getElementById('dynamic-modal-close').onclick = () => {
@@ -456,6 +533,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function navigateTo(targetId) {
     const viewAllBtn = document.getElementById('view-all-products-btn');
+    const targetSection = document.getElementById(targetId);
+
+    // If section doesn't exist on this page (e.g. we are on products.html), redirect to index.html
+    if (!targetSection) {
+      window.location.href = 'index.html#' + targetId;
+      return;
+    }
 
     // Logic: Home shows ALL, others show ONLY target
     if (targetId === 'home') {

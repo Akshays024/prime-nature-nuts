@@ -82,9 +82,7 @@
 
         <button class="btn btn-secondary" id="refresh-products">
             <i class="fas fa-sync-alt"></i> Refresh
-        </button> <button class="btn btn-secondary" id="refresh-products">
-                            <i class="fas fa-sync-alt"></i> Refresh
-                        </button>
+        </button>
                     </div>
                 </header>
 
@@ -327,5 +325,26 @@
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.min.js"></script>
 <script src="public/js/admin.js"></script>
 
+<script>
+    // // Mobile Sidebar Toggle Logic
+    // document.addEventListener('DOMContentLoaded', () => {
+    //     const menuToggle = document.getElementById('menu-toggle');
+    //     const sidebar = document.querySelector('.sidebar');
+        
+    //     if (menuToggle && sidebar) {
+    //         menuToggle.addEventListener('click', (e) => {
+    //             e.stopPropagation(); // Prevent triggering document click
+    //             sidebar.classList.toggle('open');
+    //         });
+
+    //         // Close sidebar when clicking outside
+    //         document.addEventListener('click', (e) => {
+    //             if (window.innerWidth <= 768 && sidebar.classList.contains('open') && !sidebar.contains(e.target) && e.target !== menuToggle) {
+    //                 sidebar.classList.remove('open');
+    //             }
+    //         });
+    //     }
+    // });
+</script>
 </body>
 </html>

@@ -10,17 +10,25 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+  <style>
+    /* Responsive spacing for About section */
+    #about { padding-top: 80px !important; }
+    @media (max-width: 768px) {
+      #about { padding-top: 60px !important; }
+      .about-image img { margin-bottom: 1.5rem; }
+    }
+  </style>
 
 <!-- NAVBAR (same as index.html) -->
 
-<section class="about" style="padding-top:140px">
+<section class="about" id="about">
   <div class="container">
-    <h2 class="section-title">About Prime Nature</h2>
-    <p class="section-subtitle">Pure. Natural. Premium.</p>
+    <h2 class="section-title" style="margin-bottom: 0.5rem;">About Prime Nature</h2>
+    <p class="section-subtitle" style="margin-top: 0; margin-bottom: 1.5rem;">Pure. Natural. Premium.</p>
 
     <div class="about-content">
       <div class="about-image">
-        <div class="about-image-placeholder"></div>
+        <img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=800&q=80" alt="Premium Dry Fruits" style="width: 100%; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
       </div>
 
       <div class="about-text">
@@ -32,6 +40,37 @@
           <div class="feature"><i class="fas fa-check-circle"></i><span>Quality Checked</span></div>
           <div class="feature"><i class="fas fa-seedling"></i><span>Sustainably Sourced</span></div>
         </div>
+      </div>
+    </div>
+
+    <!-- Added Content directly to HTML to ensure it shows immediately -->
+    <div class="about-enhancement" style="margin-top: 3rem;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        
+        <div style="text-align: center; padding: 1.5rem; background: var(--card-bg, #fff); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <i class="fas fa-leaf" style="font-size: 2rem; color: var(--primary-color, #2ecc71); margin-bottom: 1rem;"></i>
+          <h3 style="margin-bottom: 0.5rem; color: var(--text-color, #333);">100% Natural</h3>
+          <p style="color: var(--text-light, #666); font-size: 0.9rem; line-height: 1.5;">
+            Sourced directly from the finest farms to ensure purity and freshness in every bite.
+          </p>
+        </div>
+
+        <div style="text-align: center; padding: 1.5rem; background: var(--card-bg, #fff); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <i class="fas fa-heart" style="font-size: 2rem; color: var(--primary-color, #2ecc71); margin-bottom: 1rem;"></i>
+          <h3 style="margin-bottom: 0.5rem; color: var(--text-color, #333);">Premium Quality</h3>
+          <p style="color: var(--text-light, #666); font-size: 0.9rem; line-height: 1.5;">
+            Handpicked selection of nuts and dry fruits, rich in nutrients and flavor.
+          </p>
+        </div>
+
+        <div style="text-align: center; padding: 1.5rem; background: var(--card-bg, #fff); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <i class="fas fa-shipping-fast" style="font-size: 2rem; color: var(--primary-color, #2ecc71); margin-bottom: 1rem;"></i>
+          <h3 style="margin-bottom: 0.5rem; color: var(--text-color, #333);">Fast Delivery</h3>
+          <p style="color: var(--text-light, #666); font-size: 0.9rem; line-height: 1.5;">
+            Quick and reliable shipping to bring healthy goodness right to your doorstep.
+          </p>
+        </div>
+
       </div>
     </div>
   </div>
